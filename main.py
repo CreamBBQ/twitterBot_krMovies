@@ -1,7 +1,9 @@
 import requests
 import lxml.html as html
 import os
-import pandas as pd 
+from googletrans import Translator
+translator = Translator()
+
 
 #I'm going to ignore movies that have a summary that's too long because tweets have a character limit 
 TITLE_PATH = '//div[@class="lister-item-content"]/p[@class="" and not(contains(.,"...                "))]/../h3[@class="lister-item-header"]/a/text()'
@@ -12,6 +14,13 @@ page1 = 'https://www.imdb.com/list/ls052519910/?sort=list_order,asc&st_dt=&mode=
 #'https://www.imdb.com/list/ls052519910/?sort=list_order,asc&st_dt=&mode=detail&page=n'
 #This link takes you to the n list of movies. Every list had 100 movies. There are 1833 list. 
 
+
+def translation(some_list): 
+    result = translator.translate(some_list, src='en', dest='es')
+    spanish_list = []
+    for trans in result: 
+        spanish_list.append(trans.text)
+    return spanish_list
 
 def get_list_info(some_link):
     try :
@@ -36,7 +45,8 @@ def get_list_info(some_link):
 
 
 def run():
-    get_list_info(page1)
+    coso = translation(["hellow", "apple"])
+    print(coso)
 
 
 if __name__ == "__main__":
