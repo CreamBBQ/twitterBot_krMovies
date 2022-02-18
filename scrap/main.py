@@ -10,6 +10,3 @@ STARS_PATH = '//div[@class="lister-item-content"]/p[@class="" and not(contains(.
 
 #'https://www.imdb.com/list/ls052519910/?sort=list_order,asc&st_dt=&mode=detail&page=n'
 #This link takes you to the n list of movies. Every list had 100 movies. There are 1833 list. 
-
-
-#$x('//div[@class="ipl-rating-star small"]/span[@class="ipl-rating-star__rating"]/text()').map(x => x.wholeText)
