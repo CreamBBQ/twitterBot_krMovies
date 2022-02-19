@@ -1,19 +1,18 @@
-import random
+import csv
 import requests
 import lxml.html as html
 from googletrans import Translator
 translator = Translator()
-movies_info = []
 
 
 #I'm going to ignore movies that have a summary that's too long because tweets have a character limit 
-TITLE_PATH = '//div[@class="lister-item-content"]/p[@class="" and not(contains(.,"...                "))]/../h3[@class="lister-item-header"]/a/text()'
-ABSTRACT_PATH  = '//div[@class="lister-item-content"]/p[@class="" and not(contains(.,"...                "))]/text()'
-YEAR_PATH = '//div[@class="lister-item-content"]/p[@class="" and not(contains(.,"...                "))]/../h3[@class="lister-item-header"]/span[@class="lister-item-year text-muted unbold"]/text()'
-STARS_PATH = '//div[@class="lister-item-content"]/p[@class="" and not(contains(.,"...                "))]/../div[@class="ipl-rating-widget"]/div[@class="ipl-rating-star small"]/span[@class="ipl-rating-star__rating"]/text()'
+TITLE_PATH = '//div[@class="lister-item-content"]/p[@class="" and not(contains(.,"...                ")) and not(contains(.,"\n        ")) and not(contains(.," »\n"))]/../..//div[@class="ipl-rating-star small"]/../../h3[@class="lister-item-header"]/a/text()'
+ABSTRACT_PATH  = '//div[@class="ipl-rating-star small"]/../..//p[@class="" and not(contains(.,"...                ")) and not(contains(.,"\n        ")) and not(contains(.," »\n"))]/text()'
+YEAR_PATH = '//div[@class="lister-item-content"]/p[@class="" and not(contains(.,"...                ")) and not(contains(.,"\n        ")) and not(contains(.," »\n"))]/../..//div[@class="ipl-rating-star small"]/../../h3[@class="lister-item-header"]/span[@class="lister-item-year text-muted unbold"]/text()'
+STARS_PATH = '//div[@class="lister-item-content"]/p[@class="" and not(contains(.,"...                ")) and not(contains(.,"\n        ")) and not(contains(.," »\n"))]/../div[@class="ipl-rating-widget"]/div[@class="ipl-rating-star small"]/span[@class="ipl-rating-star__rating"]/text()'
 page1 = 'https://www.imdb.com/list/ls052519910/?sort=list_order,asc&st_dt=&mode=detail&page=1'
 #'https://www.imdb.com/list/ls052519910/?sort=list_order,asc&st_dt=&mode=detail&page=n'
-#This link takes you to the n list of movies. Every list had 100 movies. There are 1833 list. 
+#This link takes you to the n list of movies. Every list had 100 movies. There are 19 list and 1983 movies.   »\n
 
 
 def translation(some_list): 
@@ -24,27 +23,19 @@ def translation(some_list):
     return spanish_list
 
 
-def get_tweet_string(some_list, some_ranit): 
-    movie = some_list[some_ranit]
-    name = movie["name"]
-    year = movie["year"]
-    stars = movie["stars"]
-    abstract = movie["abstract"]
-    string = f"{name} {year}\n⭐ {stars}\n{abstract}"
-    return string
-
-
 def get_list_info(some_link):
     try :
         response = requests.get(some_link)
         if response.status_code == 200:
+            temportal_list = []
             home = response.content.decode('utf-8')
             parsed = html.fromstring(home)  
             title_list = parsed.xpath(TITLE_PATH)
             year_list = parsed.xpath(YEAR_PATH)
             stars_list = parsed.xpath(STARS_PATH)
             abstract_list = translation(parsed.xpath(ABSTRACT_PATH))
-            for iteration, element in enumerate(title_list):
+            #abstract_list = parsed.xpath(ABSTRACT_PATH)
+            for iteration, elemento in enumerate(title_list):
                 temporal_dic = {}
                 temporal_dic = {
                     "name" : title_list[iteration], 
@@ -52,23 +43,30 @@ def get_list_info(some_link):
                     "stars" : stars_list[iteration],
                     "abstract" : abstract_list[iteration]
                 }
-                movies_info.append(temporal_dic)
-            tweet = get_tweet_string(movies_info, random.randint(0,100))
-            print(tweet)
-            # for iteration, element in enumerate(title_list):
-            #     print(title_list[iteration])
-            #     print(year_list[iteration])
-            #     print(stars_list[iteration])
-            #     print(abstract_list[iteration])
-            #     print("\n")
+                temportal_list.append(temporal_dic)
+            return temportal_list
         else:
             raise ValueError(f'Error: {response.status_code}')
     except ValueError as ve:
         print(ve)
+        
+
+def get_movie_info(): 
+    movies_info = []
+    for n in range(1,20): 
+        link = f'https://www.imdb.com/list/ls052519910/?sort=list_order,asc&st_dt=&mode=detail&page={n}'
+        movies_info = movies_info + get_list_info(link)
+    return movies_info
 
 
 def run():
-    get_list_info(page1)
+    movies_info = get_movie_info()
+    keys = movies_info[0].keys()
+    with open('korean_movies.csv', 'w', newline='', encoding="utf-8") as output_file:
+        dict_writer = csv.DictWriter(output_file, keys)
+        dict_writer.writeheader()
+        dict_writer.writerows(movies_info)
+    
 
 
 if __name__ == "__main__":
