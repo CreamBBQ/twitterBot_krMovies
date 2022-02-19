@@ -1,6 +1,5 @@
 import requests
 import lxml.html as html
-import os
 from googletrans import Translator
 translator = Translator()
 
@@ -16,10 +15,10 @@ page1 = 'https://www.imdb.com/list/ls052519910/?sort=list_order,asc&st_dt=&mode=
 
 
 def translation(some_list): 
-    result = translator.translate(some_list, src='en', dest='es')
     spanish_list = []
-    for trans in result: 
-        spanish_list.append(trans.text)
+    for  element in some_list:
+        result = translator.translate(element, src='en', dest='es')
+        spanish_list.append(result.text)
     return spanish_list
 
 def get_list_info(some_link):
@@ -29,7 +28,7 @@ def get_list_info(some_link):
             home = response.content.decode('utf-8')
             parsed = html.fromstring(home)  
             title_list = parsed.xpath(TITLE_PATH)
-            abstract_list = parsed.xpath(ABSTRACT_PATH)
+            abstract_list = translation(parsed.xpath(ABSTRACT_PATH))
             year_list = parsed.xpath(YEAR_PATH)
             stars_list = parsed.xpath(STARS_PATH)
             for iteration, element in enumerate(title_list):
@@ -45,8 +44,7 @@ def get_list_info(some_link):
 
 
 def run():
-    coso = translation(["hellow", "apple"])
-    print(coso)
+    get_list_info(page1)
 
 
 if __name__ == "__main__":
