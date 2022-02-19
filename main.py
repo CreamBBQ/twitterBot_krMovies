@@ -1,7 +1,9 @@
+import random
 import requests
 import lxml.html as html
 from googletrans import Translator
 translator = Translator()
+movies_info = []
 
 
 #I'm going to ignore movies that have a summary that's too long because tweets have a character limit 
@@ -21,6 +23,17 @@ def translation(some_list):
         spanish_list.append(result.text)
     return spanish_list
 
+
+def get_tweet_string(some_list, some_ranit): 
+    movie = some_list[some_ranit]
+    name = movie["name"]
+    year = movie["year"]
+    stars = movie["stars"]
+    abstract = movie["abstract"]
+    string = f"{name} {year}\n⭐ {stars}\n{abstract}"
+    return string
+
+
 def get_list_info(some_link):
     try :
         response = requests.get(some_link)
@@ -28,15 +41,26 @@ def get_list_info(some_link):
             home = response.content.decode('utf-8')
             parsed = html.fromstring(home)  
             title_list = parsed.xpath(TITLE_PATH)
-            abstract_list = translation(parsed.xpath(ABSTRACT_PATH))
             year_list = parsed.xpath(YEAR_PATH)
             stars_list = parsed.xpath(STARS_PATH)
+            abstract_list = translation(parsed.xpath(ABSTRACT_PATH))
             for iteration, element in enumerate(title_list):
-                print(title_list[iteration])
-                print(year_list[iteration])
-                print(stars_list[iteration])
-                print(abstract_list[iteration])
-                print("\n")
+                temporal_dic = {}
+                temporal_dic = {
+                    "name" : title_list[iteration], 
+                    "year" : year_list[iteration],
+                    "stars" : stars_list[iteration],
+                    "abstract" : abstract_list[iteration]
+                }
+                movies_info.append(temporal_dic)
+            tweet = get_tweet_string(movies_info, random.randint(0,100))
+            print(tweet)
+            # for iteration, element in enumerate(title_list):
+            #     print(title_list[iteration])
+            #     print(year_list[iteration])
+            #     print(stars_list[iteration])
+            #     print(abstract_list[iteration])
+            #     print("\n")
         else:
             raise ValueError(f'Error: {response.status_code}')
     except ValueError as ve:
