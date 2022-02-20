@@ -5,7 +5,7 @@ from googletrans import Translator
 translator = Translator()
 
 
-#This script save important information about Korean films from a list in IDBM, with this information
+#This script save important information about Korean films from a list in IMDb, with this information
 #i'm going to have a Twitter bot that tweet a Korean film every day.
 #I'm going to ignore movies that have a summary that's too long because tweets have a character limit 
 TITLE_PATH = '//div[@class="lister-item-content"]/p[@class="" and not(contains(.,"...                ")) and not(contains(.,"\n        ")) and not(contains(.," »\n"))]/../..//div[@class="ipl-rating-star small"]/../../h3[@class="lister-item-header"]/a/text()'
